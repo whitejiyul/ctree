@@ -38,12 +38,25 @@ function canGenPoints(){
 
 // Calculate points/sec!
 function getPointGen() {
-	if(!canGenPoints())
-		return new Decimal(0)
+    // 1. 처음에는 생산량 0 (업그레이드 11이 없을 때)
+    if (!hasUpgrade('m', 11)) return new Decimal(0);
 
-	let gain = new Decimal(1)
-	return gain
+    // 2. 기본 생산량 시작 (+1)
+    let gain = new Decimal(1);
+
+    // 3. [프레스티지 부스트 고침] 보유한 P 포인트만큼 배수 적용
+    if (player.p.unlocked) {
+        // 프레스티지 포인트 보유량에 따른 부스트 (예: 1포인트면 약 1.4배, 100포인트면 11배)
+        gain = gain.times(player.p.points.add(1).pow(0.5));
+    }
+
+    // 4. 업그레이드 부스트 적용
+    if (hasUpgrade('m', 13)) gain = gain.times(2);
+    if (hasUpgrade('m', 14)) gain = gain.times(upgradeEffect('m', 14));
+
+    return gain;
 }
+
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
 function addedPlayerData() { return {
