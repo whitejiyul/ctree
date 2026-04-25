@@ -1,109 +1,209 @@
+// ==========================================================
+// 1. PRESTIGE LAYER (피) - 기초 레이어
+// ==========================================================
 addLayer("p", {
     name: "prestige", 
     symbol: "P", 
     position: 0, 
     startData() { return {
         unlocked: true,
-        points: new Decimal(0),
+		points: new Decimal(0),
         best: new Decimal(0),
-        total: new Decimal(0),
     }},
     color: "#4BDC13",
     requires: new Decimal(10), 
-    resource: "prestige points", 
-    baseResource: "points", 
+    resource: "프레스티지 포인트", 
+    baseResource: "포인트", 
     baseAmount() {return player.points}, 
     type: "normal", 
     exponent: 0.5, 
-
-    // --- 밸런스 조정된 획득 공식 ---
-    gainMult() { 
+    gainMult() {
         let mult = new Decimal(1)
         if (hasUpgrade('p', 13)) mult = mult.times(upgradeEffect('p', 13))
-        if (hasUpgrade('p', 22)) mult = mult.times(upgradeEffect('p', 22))
-        if (hasMilestone('p', 1)) mult = mult.times(2) // 마일스톤 보너스
+        if (hasUpgrade('c', 11)) mult = mult.times(upgradeEffect('c', 11))
         return mult
     },
-    gainExp() { 
-        let exp = new Decimal(1)
-        if (hasChallenge('p', 11)) exp = exp.times(1.1) // 도전 완료 보상
-        return exp
-    },
-
+    gainExp() { return new Decimal(1) },
     row: 0,
-
-    // --- 콘텐츠 확장: 업그레이드 ---
     upgrades: {
         11: {
-            title: "기초 동력",
+            title: "기초 세포",
             description: "포인트 생산량을 2배로 늘립니다.",
             cost: new Decimal(1),
         },
         12: {
-            title: "자기 강화 루프",
-            description: "프레스티지 포인트가 포인트 생산량을 부스팅합니다.",
+            title: "까마귀의 속삭임",
+            description: "까마귀(C) 레이어를 해금합니다.",
             cost: new Decimal(5),
-            effect() {
-                return player[this.layer].points.add(1).pow(0.5).softcap(100, 0.5)
-            },
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
         },
         13: {
-            title: "지식 확장",
-            description: "포인트가 프레스티지 포인트 획득량을 늘립니다.",
-            cost: new Decimal(25),
-            effect() {
-                return player.points.add(1).log10().add(1).pow(0.5)
-            },
+            title: "자가 증식",
+            description: "포인트에 따라 프레스티지 포인트 획득량이 늘어납니다.",
+            cost: new Decimal(20),
+            effect() { return player.points.add(1).log10().add(1).pow(0.5) },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
         },
-        21: {
-            title: "시간 가속",
-            description: "플레이 시간에 비례하여 포인트 생산량이 증가합니다.",
+        14: {
+            title: "깃털 준비",
+            description: "깃털(F) 레이어 해금을 준비합니다. (포인트 생산 3배)",
             cost: new Decimal(100),
-            effect() {
-                return Decimal.pow(1.1, Math.log10(player[this.layer].resetTime + 1))
-            },
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
             unlocked() { return hasUpgrade('p', 13) }
         },
-        22: {
-            title: "시너지 효과",
-            description: "구매한 업그레이드 개수당 프레스티지 포인트 획득량이 10% 증가합니다.",
-            cost: new Decimal(500),
-            effect() {
-                return new Decimal(1.1).pow(player[this.layer].upgrades.length)
-            },
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
-            unlocked() { return hasMilestone('p', 0) }
-        }
     },
-
-    // --- 콘텐츠 확장: 이정표 (진행도에 따른 편의성) ---
-    milestones: {
-        0: {
-            requirementDescription: "누적 1,000 프레스티지 포인트",
-            effectDescription: "포인트 생성 업그레이드(11번)를 자동으로 구매하고, 22번 업그레이드를 해금합니다.",
-            done() { return player[this.layer].total.gte(1000) }
-        },
-        1: {
-            requirementDescription: "누적 10,000 프레스티지 포인트",
-            effectDescription: "프레스티지 포인트 획득량이 영구적으로 2배 증가하고 초기화 시 포인트를 유지합니다.",
-            done() { return player[this.layer].total.gte(10000) }
-        }
-    },
-
-    // --- 콘텐츠 확장: 도전 (전략적 요소) ---
-    challenges: {
-        11: {
-            name: "극한의 절약",
-            challengeDescription: "모든 포인트 생산량이 ^0.5로 감소합니다.",
-            goalDescription: "5,000 포인트 도달",
-            rewardDescription: "프레스티지 포인트 획득 지수(Exponent)가 1.1배 증가합니다.",
-            canComplete() { return player.points.gte(5000) },
-            unlocked() { return hasUpgrade('p', 22) }
-        }
-    },
-
     layerShown(){return true}
 })
+
+// ==========================================================
+// 2. CROW LAYER (까마귀) - 성장의 상징
+// ==========================================================
+addLayer("c", {
+    name: "crow", 
+    symbol: "C", 
+    position: 1, 
+    startData() { return {
+        unlocked: false, 
+		points: new Decimal(0),
+    }},
+    color: "#333333", 
+    requires: new Decimal(10), 
+    resource: "까마귀", 
+    baseResource: "프레스티지 포인트", 
+    baseAmount() {return player.p.points}, 
+    type: "static", 
+    base: 1.5,
+    exponent: 1.1, 
+    row: 0, 
+    layerShown(){return hasUpgrade('p', 12) || player.c.unlocked},
+    upgrades: {
+        11: {
+            title: "까마귀 군단",
+            description: "까마귀 수에 따라 프레스티지 포인트 획득량이 증가합니다.",
+            cost: new Decimal(2),
+            effect() { return player.c.points.add(1).pow(0.75) },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+        },
+        12: {
+            title: "검은 날개",
+            description: "포인트 생산량이 5배 증가합니다.",
+            cost: new Decimal(5),
+        },
+    },
+    milestones: {
+        0: {
+            requirementDescription: "까마귀 10마리",
+            effectDescription: "포인트를 초당 프레스티지 포인트의 10%만큼 자동 획득합니다.",
+            done() { return player.c.points.gte(10) }
+        }
+    }
+})
+
+// ==========================================================
+// 3. FEATHER LAYER (깃털) - 가벼운 도약
+// ==========================================================
+addLayer("f", {
+    name: "feather",
+    symbol: "F",
+    position: 0,
+    startData() { return {
+        unlocked: false,
+        points: new Decimal(0),
+    }},
+    color: "#FFFFFF",
+    requires: new Decimal(1000),
+    resource: "깃털",
+    baseResource: "포인트",
+    baseAmount() {return player.points},
+    type: "normal",
+    exponent: 0.4,
+    row: 1, // 두 번째 줄로 이동
+    layerShown() { return hasUpgrade('p', 14) || player.f.unlocked },
+    gainMult() {
+        let mult = new Decimal(1)
+        if (hasUpgrade('f', 12)) mult = mult.times(upgradeEffect('f', 12))
+        return mult
+    },
+    upgrades: {
+        11: {
+            title: "공기 저항",
+            description: "깃털이 포인트 생산량을 크게 부스팅합니다.",
+            cost: new Decimal(10),
+            effect() { return player.f.points.add(1).pow(0.8) },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+        },
+        12: {
+            title: "가벼운 가속",
+            description: "까마귀 수에 비례하여 깃털 획득량이 늘어납니다.",
+            cost: new Decimal(50),
+            effect() { return player.c.points.add(1).log10().add(1).pow(2) },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+        },
+    }
+})
+
+// ==========================================================
+// 4. NEST LAYER (둥지) - 자원의 안식처
+// ==========================================================
+addLayer("n", {
+    name: "nest",
+    symbol: "N",
+    position: 1,
+    startData() { return {
+        unlocked: false,
+        points: new Decimal(0),
+    }},
+    color: "#8B4513",
+    requires: new Decimal(100),
+    resource: "둥지",
+    baseResource: "깃털",
+    baseAmount() {return player.f.points},
+    type: "static",
+    base: 2,
+    exponent: 1.2,
+    row: 1,
+    layerShown() { return player.f.points.gte(50) || player.n.unlocked },
+    buyables: {
+        11: {
+            title: "알 부화",
+            cost(x) { return new Decimal(1).times(x.add(1)) },
+            display() { return "포인트 생산량을 강화합니다. \n개수: " + getBuyableAmount(this.layer, this.id) + "\n가격: " + format(this.cost()) + " 둥지" },
+            canAfford() { return player[this.layer].points.gte(this.cost()) },
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            effect() { return new Decimal(2).pow(getBuyableAmount(this.layer, this.id)) }
+        },
+    }
+})
+
+// ==========================================================
+// 5. SKY LAYER (하늘) - 최종장
+// ==========================================================
+addLayer("s", {
+    name: "sky",
+    symbol: "S",
+    position: 0,
+    startData() { return {
+        unlocked: false,
+        points: new Decimal(0),
+    }},
+    color: "#87CEEB",
+    requires: new Decimal(1e12), // 1조 포인트 필요
+    resource: "천공의 정수",
+    baseResource: "포인트",
+    baseAmount() {return player.points},
+    type: "normal",
+    exponent: 0.2,
+    row: 2, // 세 번째 줄
+    layerShown() { return player.n.points.gte(5) || player.s.unlocked },
+    challenges: {
+        11: {
+            name: "중력 가속",
+            challengeDescription: "포인트 생산량이 ^0.5로 고정됩니다.",
+            goalDescription: "1e20 포인트 도달",
+            rewardDescription: "모든 레이어의 자원 획득량이 2배가 됩니다.",
+            canComplete() { return player.points.gte(1e20) },
+        }
+    }
+})
+
