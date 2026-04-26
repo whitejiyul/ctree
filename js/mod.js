@@ -1,13 +1,13 @@
 let modInfo = {
-	name: "The C Tree",
-	author: "whitejiyul",
-	pointsName: "Cpints",
+	name: "The ??? Tree",
+	author: "nobody",
+	pointsName: "points",
 	modFiles: ["layers.js", "tree.js"],
 
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal (10), // Used for hard resets and new players
-	offlineLimit: 1000,  // In hours
+	offlineLimit: 1,  // In hours
 }
 
 // Set your version in num and name
@@ -38,25 +38,12 @@ function canGenPoints(){
 
 // Calculate points/sec!
 function getPointGen() {
-    // 1. 첫 업글 '엔진 점화'가 없으면 생산량은 0입니다.
-    if (!hasUpgrade('m', 11)) return new Decimal(0);
+	if(!canGenPoints())
+		return new Decimal(0)
 
-    // 2. 기본 1에서 시작
-    let gain = new Decimal(1);
-
-    // 3. 프레스티지 포인트(P)가 있다면 그만큼 곱해줍니다. (기본 부스트)
-    if (player.p.unlocked) {
-        gain = gain.times(player.p.points.add(1).pow(0.5));
-    }
-
-    // 4. M 레이어 업그레이드들 적용
-    if (hasUpgrade('m', 13)) gain = gain.times(2);
-    if (hasUpgrade('m', 14)) gain = gain.times(upgradeEffect('m', 14));
-
-    return gain;
+	let gain = new Decimal(1)
+	return gain
 }
-
-
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
 function addedPlayerData() { return {
