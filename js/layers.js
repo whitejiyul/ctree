@@ -1,28 +1,71 @@
 addLayer("p", {
-    name: "prestige", // This is optional, only used in a few places, If absent it just uses the layer id.
-    symbol: "P", // This appears on the layer's node. Default is the id with the first letter capitalized
-    position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
-    startData() { return {
-        unlocked: true,
-		points: new Decimal(0),
-    }},
+    name: "Prestige",
+    symbol: "P",
+    position: 0,
+    row: 0,
+    startData() { return { unlocked: true, points: new Decimal(0) }},
     color: "#4BDC13",
-    requires: new Decimal(10), // Can be a function that takes requirement increases into account
-    resource: "prestige points", // Name of prestige currency
-    baseResource: "points", // Name of resource prestige is based on
-    baseAmount() {return player.points}, // Get the current amount of baseResource
-    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
-    exponent: 0.5, // Prestige currency exponent
-    gainMult() { // Calculate the multiplier for main currency from bonuses
-        mult = new Decimal(1)
-        return mult
-    },
-    gainExp() { // Calculate the exponent on main currency from bonuses
-        return new Decimal(1)
-    },
-    row: 0, // Row the layer is in on the tree (0 is the first row)
-    hotkeys: [
-        {key: "p", description: "P: Reset for prestige points", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
-    ],
-    layerShown(){return true}
+    requires: new Decimal(10),
+    resource: "prestige points",
+    baseResource: "points",
+    baseAmount() { return player.points },
+    type: "normal",
+    exponent: 0.5,
+    gainMult() { return new Decimal(1) },
+    gainExp() { return new Decimal(1) },
+    layerShown() { return true }
+})
+// 첫 번째 레이어 (컨텐츠 1)
+addLayer("b", {
+    name: "Booster",
+    symbol: "B",
+    position: 0,
+    row: 1,
+    startData() { return { unlocked: false, points: new Decimal(0) }},
+    color: "#3366FF",
+    requires: new Decimal(100), // P-points 100개 필요
+    resource: "boosters",
+    baseResource: "prestige points",
+    baseAmount() { return player.p.points },
+    type: "static", // 개수가 정해진 형태
+    exponent: 1.2,
+    gainMult() { return new Decimal(1) },
+    gainExp() { return new Decimal(1) },
+    layerShown() { return player.p.unlocked }
+})
+
+// 두 번째 레이어 (컨텐츠 2)
+addLayer("g", {
+    name: "Generator",
+    symbol: "G",
+    position: 1,
+    row: 1,
+    startData() { return { unlocked: false, points: new Decimal(0) }},
+    color: "#FF9900",
+    requires: new Decimal(200),
+    resource: "generators",
+    baseResource: "prestige points",
+    baseAmount() { return player.p.points },
+    type: "static",
+    exponent: 1.3,
+    gainMult() { return new Decimal(1) },
+    gainExp() { return new Decimal(1) },
+    layerShown() { return player.p.unlocked }
+})
+addLayer("m", {
+    name: "Mega",
+    symbol: "M",
+    position: 0,
+    row: 2,
+    startData() { return { unlocked: false, points: new Decimal(0) }},
+    color: "#AA00FF",
+    requires: new Decimal(10), // Booster 10개 필요 (예시)
+    resource: "mega points",
+    baseResource: "boosters",
+    baseAmount() { return player.b.points },
+    type: "normal",
+    exponent: 0.4,
+    gainMult() { return new Decimal(1) },
+    gainExp() { return new Decimal(1) },
+    layerShown() { return player.b.unlocked || player.g.unlocked }
 })
