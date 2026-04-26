@@ -42,12 +42,16 @@ function getPointGen() {
 		return new Decimal(0)
 
 	let gain = new Decimal(1)
-    
-    // 이후 layers.js에서 정의할 업그레이드 효과를 여기에 추가하게 됩니다.
-    // 예: if (hasUpgrade('c', 11)) gain = gain.times(upgradeEffect('c', 11))
-    
+
+	// 1. 프레스티즈 포인트에 의한 부스트 (포인트^0.2 + 1)
+	if (player.p.points.gt(0)) gain = gain.times(player.p.points.add(1).pow(0.2))
+
+	// 2. 업그레이드 11번 효과 (멀티플라이어)
+	if (hasUpgrade('p', 11)) gain = gain.times(upgradeEffect('p', 11))
+
 	return gain
 }
+
 
 // 세이브 데이터에 추가할 변수들
 function addedPlayerData() { return {
