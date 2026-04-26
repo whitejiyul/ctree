@@ -1,5 +1,7 @@
 let modInfo = {
-	name: "cTree", // 프로젝트 이름 반영
+    name: "cTree",
+    id: "ctree_v1_unique_id_2026", // 이 부분을 기존과 다르게 수정하세요!
+
 	author: "Whitejiyul", // 제작자 이름
 	pointsName: "points",
 	modFiles: ["layers.js", "tree.js"],
